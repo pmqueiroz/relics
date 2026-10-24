@@ -57,7 +57,8 @@ Code is the truth. This file explains the *why* behind the shape it takes.
 - `components/artifact/` — the reusable 3D `Artifact` viewer.
 - `i18n/` — locales, dictionaries, `LocaleProvider`, `LocaleSwitch`
   (see [i18n.md](./i18n.md)).
-- `proxy.ts` — redirects unprefixed paths to a locale.
+- `proxy.ts` — redirects unprefixed paths to a locale; its matcher keeps it
+  off locale pages and textures (see [i18n.md](./i18n.md)).
 - `features/<name>/` — one directory per feature. Currently
   `features/archive/`, see [archive.md](./archive.md).
 - `relics/` — the catalog data: one `.relic` per entry, read at build time
