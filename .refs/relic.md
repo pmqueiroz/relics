@@ -124,8 +124,15 @@ manifest without `assets` plus the decoded asset bytes.
 - **Textures**: `app/relics/[id]/[face]/route.ts` serves an asset slice with
   its MIME type (404 when absent). `generateStaticParams` lists every id ×
   `obv`/`rev`, so all are prerendered. `artifactProps` points `obv`/`rev` at
-  `relicAssetUrl(id, face)` when `item.faces[face]` is set, so images never
-  travel as Base64 in the page payload.
+  `relicAssetUrl(id, face, version)` when `item.faces[face]` is set, so
+  images never travel as Base64 in the page payload.
+  - **Versioned, immutable**: `item.faces[face]` is not a flag but the
+    asset's version, `crc32` of its bytes in base 36 (`assetVersion` in
+    `manifest.ts`), or `null` without a scan. The URL carries it as
+    `?v=<version>` and the route answers
+    `Cache-Control: public, max-age=31536000, immutable`, so browsers
+    never revalidate a texture. Replacing a scan changes its CRC and
+    therefore its URL. The route itself ignores `v`; it only busts caches.
 - **Share page / preview card**: `app/relics/[id]/` (page and
   `opengraph-image.tsx`) uses `loadCatalogItem(id)` and `readRelicAsset`;
   see [archive.md](./archive.md#behavior-rules).

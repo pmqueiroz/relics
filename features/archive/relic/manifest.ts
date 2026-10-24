@@ -8,7 +8,16 @@ import {
   KINDS,
   kindGeometry,
 } from "../catalog";
-import { isRecord, type RelicContents } from "./relic-file";
+import {
+  crc32,
+  isRecord,
+  type RelicAsset,
+  type RelicContents,
+} from "./relic-file";
+
+function assetVersion(asset: RelicAsset | undefined) {
+  return asset ? crc32(asset.bytes).toString(36) : null;
+}
 
 export const SPEC_FIELDS: Record<ArtifactKind, string[]> = {
   coin: ["cur", "denom", "mint", "metal", "dia", "thk", "wt", "edge"],
@@ -86,7 +95,7 @@ export function parseCatalogEntry({
     cond: manifest.cond,
     face: manifest.face,
     model: parseModel(kind, manifest.model),
-    faces: { obv: Boolean(assets.obv), rev: Boolean(assets.rev) },
+    faces: { obv: assetVersion(assets.obv), rev: assetVersion(assets.rev) },
   };
   for (const field of SPEC_FIELDS[kind]) entry[field] = specs[field];
   return entry as CatalogItem;

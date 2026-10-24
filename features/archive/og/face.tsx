@@ -15,7 +15,7 @@ const SILHOUETTE: Record<
 };
 
 export function hasFaceScan(item: CatalogItem) {
-  return item.faces.obv || item.faces.rev;
+  return Boolean(item.faces.obv || item.faces.rev);
 }
 
 export async function faceImage(item: CatalogItem, maxSize: number) {

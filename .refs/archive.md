@@ -50,7 +50,8 @@ rewritten as React + Tailwind.
   [Relic editor](#relic-editor-dev-only).
 - `features/archive/artifact-config.ts` — `ArtifactModel` (mesh, fits),
   `ArtifactConfig` (model + face images), `blankConfig(geo)`,
-  `relicAssetUrl(id, face)`, and `artifactProps(item, config?)` which maps
+  `relicAssetUrl(id, face, version)` (versioned texture URL, see
+  [relic.md](./relic.md)), and `artifactProps(item, config?)` which maps
   an item to `<Artifact>` props (the item's relic model and texture URLs
   when no config is given).
 - `components/artifact/` — the reusable 3D `Artifact` viewer (see below).

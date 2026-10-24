@@ -22,6 +22,9 @@ export async function GET(
   const asset = side ? await readRelicAsset(id, side) : null;
   if (!asset) return new Response(null, { status: 404 });
   return new Response(asset.bytes, {
-    headers: { "Content-Type": asset.type },
+    headers: {
+      "Content-Type": asset.type,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
   });
 }

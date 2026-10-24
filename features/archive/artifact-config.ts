@@ -28,15 +28,15 @@ export function relicPagePath(locale: Locale, id: string) {
   return localePath(locale, `/relics/${encodeURIComponent(id)}`);
 }
 
-export function relicAssetUrl(id: string, face: FaceSide) {
-  return `/relics/${encodeURIComponent(id)}/${face}`;
+export function relicAssetUrl(id: string, face: FaceSide, version: string) {
+  return `/relics/${encodeURIComponent(id)}/${face}?v=${version}`;
 }
 
 function itemConfig(item: CatalogItem): ArtifactConfig {
   return {
     ...item.model,
-    obv: item.faces.obv ? relicAssetUrl(item.id, "obv") : "",
-    rev: item.faces.rev ? relicAssetUrl(item.id, "rev") : "",
+    obv: item.faces.obv ? relicAssetUrl(item.id, "obv", item.faces.obv) : "",
+    rev: item.faces.rev ? relicAssetUrl(item.id, "rev", item.faces.rev) : "",
   };
 }
 

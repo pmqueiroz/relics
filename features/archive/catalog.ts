@@ -23,7 +23,7 @@ type BaseItem = {
   cond: Condition;
   face: string;
   model: ArtifactModel;
-  faces: { obv: boolean; rev: boolean };
+  faces: { obv: string | null; rev: string | null };
 };
 
 export type CoinItem = BaseItem & {
