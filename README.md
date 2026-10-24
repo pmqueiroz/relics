@@ -1,57 +1,76 @@
-# harness-driven-repo
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.png">
+  <img alt="Relics" src=".github/assets/banner-light.png" width="100%">
+</picture>
 
-Starter scaffold for a project where AI coding agents (Claude Code and
-compatible tools) do most of the day-to-day authoring. It sets up a
-self-maintaining documentation loop: agents write code, and the same task
-requires them to update the doc that explains it — so `.refs/` never drifts
-far from the code it describes.
+My catalog of my collectibles (coins, banknotes, stamps,
+phonecards).
 
-Extracted from a real project's `AGENTS.md`/`.agents/`/`.refs/`
-setup; genericized so it drops into any stack.
+## How it works
 
-## What's in here
+- **The data is files.** Every catalog entry is one binary `.relic` file in
+  `relics/`. There is no database and no upload endpoint: the repo is the
+  catalog, and adding an object means committing a file.
+- **Read at build time.** `loadCatalog()` decodes and validates every relic
+  under `'use cache'`. A malformed file fails the build with
+  `relics/<file>: <reason>` instead of shipping a broken entry.
+- **Textures are served, not inlined.** Face scans live inside the relic;
+  `app/relics/[id]/[face]` slices them out as images and is prerendered for
+  every entry, so page payloads never carry Base64 images.
+- **Editing is a dev-time tool.** Under `next dev` a relic editor (yellow
+  controls, compiled out of production) writes `relics/<id>.relic` through a
+  Server Action. The texture editor crops scans to the face shape and bakes
+  them into the file. Production is read-only.
+- **Every relic is linkable.** `/<lang>/relics/<id>` is a share page with
+  its own generated preview card (OG image).
 
-- **`AGENTS.md`** — the single entry point for every agent (no separate
-  `CLAUDE.md`): a map of `.refs/`, the Operating Protocol (the
-  self-maintaining loop rule itself), and where skills live.
-- **`.claude/skills/`** — generated, gitignored mirror for Claude Code:
-  each entry links back to `.agents/skills/<name>`, recreated by Claude
-  whenever it loads skills (per `AGENTS.md`).
-- **`.agents/skills/commit/SKILL.md`** — an example skill: encodes this
-  project's commit conventions (Conventional Commits, atomic, title-only)
-  so an agent doesn't have to be told the rules every session.
-- **`.refs/`** — the living documentation set:
-  - `conventions.md` — hard authoring rules (no code comments; docs go in
-    `.refs/` instead; reusable-component discipline).
-  - `architecture.md` — a filled-in-as-you-go template for the system's
-    shape: layout, extension points, shared state, design system.
-  - `ci-cd.md` — a filled-in-as-you-go template for the CI/CD pipeline.
-  - `incidents/` — postmortem log with a starting set of standing rules and
-    a `TEMPLATE.md` for new entries.
+## The `.relic` file
 
-## Setup
+A chunked binary container, one file holds
+everything about an object.
 
-1. Copy this whole tree into a new or existing repo root.
-2. Fill in `.refs/architecture.md` and `.refs/ci-cd.md` — every bracketed
-   `[...]` is a real decision this project needs to make once, not
-   boilerplate to leave in place.
-3. Adjust `.agents/skills/commit/SKILL.md`'s type rules and scopes if this
-   project's conventions differ.
-4. Add project-specific `.refs/` files as real subsystems appear (e.g. an
-   economy/billing system, an observability rollout, a compliance doc) and
-   link each one from `AGENTS.md`'s list.
-5. Delete this README's setup section once done, or leave it — it costs an
-   agent nothing to skip a section that's already satisfied.
+```
+0x00  header   20 B   "RLIC" · version u16 · flags u16 · meta_len u32 · bin_len u32 · crc32 u32
+0x14  META     N B    UTF-8 JSON manifest, space-padded to a multiple of 4
+      BUFF     M B    raw image bytes (webp / png / jpeg), each 4-byte aligned
+```
 
-## Why this shape
+- **Manifest** holds universal fields (id, kind, title, origin, year,
+  condition, amount), a per-kind `specs` block (mint, metal, diameter…), a
+  parametric `model` for the 3D mesh, and `assets` offsets into the buffer.
+- **Raw bytes, not Base64**, so no ~33% bloat. Identical obverse/reverse
+  images are stored once and referenced twice.
+- **Strict decoder.** Little-endian, CRC-32 over both chunks, exact length
+  check; unknown versions and unknown or reserved flags are rejected rather
+  than guessed at.
+- **Isomorphic codec** (`features/archive/relic/relic-file.ts`): no Node or
+  DOM APIs, so the server loader and the in-browser editor share it.
 
-- **One file agents always read first** (`AGENTS.md`), instead of docs
-  scattered and undiscoverable.
-- **Docs next to a binding rule to update them**, not a wiki that rots the
-  moment nobody's assigned to it — the Operating Protocol makes "update the
-  ref" part of the task definition, not a follow-up.
-- **No comments in code** pushes explanation into `.refs/`, where it's
-  findable by concern instead of buried at the line that happened to need
-  it.
-- **Incidents are logged, not just fixed** — the standing rules earned from
-  a past bug are cheap insurance against repeating the same wrong turn.
+Full byte layout, flags and manifest rules: [`.refs/relic.md`](./.refs/relic.md).
+
+## Architecture decisions
+
+- **CSS 3D, not WebGL.** The artifact viewer is a `preserve-3d` rig built
+  from DOM layers, with meshes generated from millimetre geometry per kind.
+  It stays light and crisp, at the cost of not rendering arbitrary meshes
+  (which is why the custom `.obj` flag is reserved). The grid draws a flat
+  front face per card and only mounts the full rig on hover.
+- **Localized routes.** Every page sits under `/[lang]` (`en`, `pt-BR`);
+  `proxy.ts` negotiates the locale. Typed dictionaries, no i18n library:
+  English defines the shape and a missing translation is a type error.
+- **Dev-only code never ships.** `*.dev.tsx` routes are only page
+  extensions under the dev phase, and inline `NODE_ENV` checks strip
+  dev UI from production bundles.
+
+## Layout
+
+```
+app/[lang]/          pages: index, relic share page, dev-only editors
+app/relics/          texture route (locale-independent)
+features/archive/    catalog, views, relic codec, editors
+components/          shared UI, 3D artifact viewer, brand mark
+i18n/                locales, dictionaries, provider
+relics/              the catalog: one .relic per entry
+.refs/               architecture and feature notes for agentic harness
+```
