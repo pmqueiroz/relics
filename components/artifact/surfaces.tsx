@@ -1,5 +1,11 @@
 import Image from "next/image";
-import { type CSSProperties, type ReactNode, useState } from "react";
+import {
+  type CSSProperties,
+  createContext,
+  type ReactNode,
+  useContext,
+  useState,
+} from "react";
 import { cx } from "../ui/cx";
 import { fitTransform } from "./geometry";
 import type { Fit } from "./types";
@@ -20,6 +26,8 @@ export function Sheen({
     />
   );
 }
+
+export const EagerImages = createContext(false);
 
 type LoadStatus = "loaded" | "failed";
 
@@ -105,6 +113,7 @@ export function FittedImage({
 }) {
   const [natural, setNatural] = useState<{ src: string; aspect: number }>();
   const aspect = natural?.src === src ? natural.aspect : null;
+  const eager = useContext(EagerImages);
 
   return (
     <div
@@ -120,6 +129,8 @@ export function FittedImage({
           alt=""
           fill
           unoptimized
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
           draggable={false}
           className="object-cover"
           onLoad={(event) => {

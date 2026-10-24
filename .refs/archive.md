@@ -90,7 +90,14 @@ rewritten as React + Tailwind.
     flips back to flat. Phones never leave `flat`.
   - A card mounts its `Artifact` only while its stage is within 600px
     (vertically) of the viewport (`useInView`); off-screen cards keep their
-    box and caption. Cards are `memo`ed and get a stable `onOpen` (latest
+    box and caption. The first `EAGER_CARDS` (12) cards of the current list
+    start in view (`useInView`'s `initial`), so their `Artifact` is in the
+    prerendered HTML and the browser finds their images before hydration.
+    Those cards wrap the `Artifact` in `EagerImages` (context in
+    `surfaces.tsx`), which turns `FittedImage` to `loading="eager"` +
+    `fetchPriority="high"`; every other face image is `loading="lazy"`.
+    Only items with scans emit an `<img>`, so a first row without scans
+    prerenders placeholders only. Cards are `memo`ed and get a stable `onOpen` (latest
     handler kept in a ref), so `ArchiveIndex` state changes (drawer
     spin/zoom/flip, hover) do not re-render the grid.
 - **Hover preview** appears after `dwell` ms (default 300) and is suppressed

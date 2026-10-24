@@ -47,7 +47,8 @@ Code is the truth. This file explains the *why* behind the shape it takes.
   (`touch` and `fill` sizes for phone controls, `disabled`, optional
   `label` for the `<fieldset>` group name), `SectionLabel`,
   `RangeField` (taller rows below `regular:`), `useMediaQuery`, `useInView`
-  (IntersectionObserver visibility of a ref, with `rootMargin`),
+  (IntersectionObserver visibility of a ref, with `rootMargin` and an
+  `initial` value for elements that should render on the server),
   `DevLink` / `devButtonClass` (yellow dev-only link, built on
   `buttonShape(size)` from `button.tsx`),
   `useScrollLock` (sets `overflow: hidden` on `<html>` while `locked`;

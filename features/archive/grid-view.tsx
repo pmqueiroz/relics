@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Artifact } from "../../components/artifact/artifact";
+import { EagerImages } from "../../components/artifact/surfaces";
 import { useInView } from "../../components/ui/use-in-view";
 import { ArtifactCaption } from "./artifact-caption";
 import { artifactProps } from "./artifact-config";
@@ -13,6 +14,7 @@ type GridViewProps = {
 
 const MOUNT_MARGIN = "600px 0px";
 const SETTLE_MS = 700;
+const EAGER_CARDS = 12;
 
 export function GridView({ items, tilt, onOpen }: GridViewProps) {
   const openRef = useRef(onOpen);
@@ -21,8 +23,14 @@ export function GridView({ items, tilt, onOpen }: GridViewProps) {
 
   return (
     <main className="grid grid-cols-2 gap-2 p-3 pb-[calc(env(safe-area-inset-bottom)+72px)] regular:grid-cols-[repeat(auto-fill,minmax(232px,1fr))] regular:gap-3 regular:px-7 regular:pb-12 regular:pt-6">
-      {items.map((item) => (
-        <GridCard key={item.id} item={item} tilt={tilt} onOpen={open} />
+      {items.map((item, index) => (
+        <GridCard
+          key={item.id}
+          item={item}
+          tilt={tilt}
+          eager={index < EAGER_CARDS}
+          onOpen={open}
+        />
       ))}
     </main>
   );
@@ -31,14 +39,16 @@ export function GridView({ items, tilt, onOpen }: GridViewProps) {
 const GridCard = memo(function GridCard({
   item,
   tilt,
+  eager,
   onOpen,
 }: {
   item: CatalogItem;
   tilt: boolean;
+  eager: boolean;
   onOpen: (id: string) => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(stageRef, MOUNT_MARGIN);
+  const inView = useInView(stageRef, MOUNT_MARGIN, eager);
   const [active, setActive] = useState(false);
   const settle = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -63,10 +73,12 @@ const GridCard = memo(function GridCard({
     >
       <div ref={stageRef} className="relative aspect-[1/0.84] w-full">
         {inView && (
-          <Artifact
-            {...artifactProps(item)}
-            mode={tilt && active ? "tilt" : "flat"}
-          />
+          <EagerImages value={eager}>
+            <Artifact
+              {...artifactProps(item)}
+              mode={tilt && active ? "tilt" : "flat"}
+            />
+          </EagerImages>
         )}
       </div>
       <ArtifactCaption item={item} truncate fluid />
