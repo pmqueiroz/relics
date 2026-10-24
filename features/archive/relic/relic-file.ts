@@ -50,7 +50,7 @@ function align4(length: number) {
   return (length + 3) & ~3;
 }
 
-function sameAsset(a: RelicAsset | undefined, b: RelicAsset) {
+export function sameAsset(a: RelicAsset | undefined, b: RelicAsset) {
   return (
     a !== undefined &&
     a.type === b.type &&

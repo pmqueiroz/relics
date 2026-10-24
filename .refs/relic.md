@@ -104,6 +104,21 @@ either is a decoder change; for zstd the spec must first say whether
   viewer renders both the same way. Every relic in `relics/` was baked
   once by a throwaway Node + `sharp` script mirroring `cropToFace` (not
   committed), so all current files are already cropped.
+- **Server re-encode**: the relic editor's `saveRelic` passes the decoded
+  assets through `optimizeAssets`
+  (`features/archive/relic-editor/optimize-assets.ts`), which re-encodes
+  each WebP face with `sharp` (`quality: 75`, `effort: 6`, metadata
+  dropped) and keeps the result only when it is smaller. Browser canvas
+  WebP uses a lower effort, so this saves about 3-8% per scan. PNG/JPEG
+  faces are never touched (no silent lossless → lossy). A face whose bytes
+  equal one already stored in the file being edited (`previousId`) is
+  kept verbatim: each lossy pass still shrinks ~1% by discarding detail,
+  so re-encoding on every save would degrade a scan a little each time.
+  Clones and new entries have no stored file, so their faces get one pass.
+  Byte-identical `obv`/`rev` are encoded once and stay shared. The texture
+  editor's Download runs in the browser and skips this step. All 29
+  scans in `relics/` were re-encoded once with the same settings by a
+  throwaway script (919,140 → 890,488 B total).
 - **Shared faces**: when `obv` and `rev` carry byte-identical images (one
   scan used for both sides), `encodeRelic` writes the bytes once and both
   entries point at the same `offset`/`length`. Overlapping entries are

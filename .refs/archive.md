@@ -378,8 +378,9 @@ the routes nor the buttons (see
   development, decodes and validates with the strict `parseCatalogEntry`
   (its error message is shown in the status), requires an id matching
   `^[A-Za-z0-9][A-Za-z0-9._-]*$` (it becomes a file name), refuses an id
-  that already belongs to another entry, writes `relics/<id>.relic`,
-  deletes the old file when the id was changed, and calls
+  that already belongs to another entry, re-encodes new scans with
+  `sharp` (see **Server re-encode** in [relic.md](./relic.md#manifest)),
+  writes `relics/<id>.relic`, deletes the old file when the id was changed, and calls
   `updateTag("relics")`. The client then pushes to the relic's share page, keeping the query string.
 - **Activity**: with Cache Components, Next keeps visited pages mounted
   but hidden. The form is keyed on `useRouter().bfcacheId`, so a link or

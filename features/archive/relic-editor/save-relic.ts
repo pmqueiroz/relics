@@ -3,9 +3,20 @@
 import { unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { updateTag } from "next/cache";
-import { loadCatalog, RELIC_CACHE_TAG, RELIC_DIR } from "../relic/load-catalog";
+import {
+  loadCatalog,
+  RELIC_CACHE_TAG,
+  RELIC_DIR,
+  readRelic,
+} from "../relic/load-catalog";
 import { parseCatalogEntry } from "../relic/manifest";
-import { decodeRelic, RELIC_EXTENSION } from "../relic/relic-file";
+import {
+  decodeRelic,
+  encodeRelic,
+  RELIC_EXTENSION,
+  type RelicContents,
+} from "../relic/relic-file";
+import { optimizeAssets } from "./optimize-assets";
 
 export type SaveRelicResult = { id: string } | { error: string };
 
@@ -24,10 +35,11 @@ export async function saveRelic(formData: FormData): Promise<SaveRelicResult> {
   if (previous !== null && typeof previous !== "string")
     return { error: "invalid previous id" };
 
-  const bytes = new Uint8Array(await upload.arrayBuffer());
+  let contents: RelicContents;
   let id: string;
   try {
-    id = parseCatalogEntry(decodeRelic(bytes)).id;
+    contents = decodeRelic(new Uint8Array(await upload.arrayBuffer()));
+    id = parseCatalogEntry(contents).id;
   } catch (error) {
     return { error: (error as Error).message };
   }
@@ -39,7 +51,12 @@ export async function saveRelic(formData: FormData): Promise<SaveRelicResult> {
   if (id !== previous && ids.includes(id))
     return { error: `${id} already exists` };
 
-  await writeFile(relicFile(id), bytes);
+  const stored =
+    previous === null
+      ? {}
+      : (await readRelic(`${previous}${RELIC_EXTENSION}`)).assets;
+  const assets = await optimizeAssets(contents.assets, stored);
+  await writeFile(relicFile(id), encodeRelic({ ...contents, assets }));
   if (previous !== null && previous !== id) await unlink(relicFile(previous));
   updateTag(RELIC_CACHE_TAG);
   return { id };
