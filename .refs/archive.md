@@ -44,6 +44,13 @@ rewritten as React + Tailwind.
 - `features/archive/texture-editor/` — modal (`texture-editor.tsx`), 2D
   face editor (`face-editor.tsx`), field schema (`schema.ts`), image
   ingest, 600 dpi template export, relic open/download (`texture-file.ts`).
+  `ArchiveIndex` loads the modal with `next/dynamic` and mounts it only
+  while open, so its code (and the codec, ingest and template export it
+  pulls in) is a separate chunk fetched on first open, not part of the
+  index's initial JS. The draft state stays in `ArchiveIndex`, so
+  `TextureDraft` and `blankTexture` live in the dependency-free
+  `texture-draft.ts`; importing them from `texture-file.ts` would drag the
+  editor code back into the initial bundle.
 - `features/archive/relic-editor/` + `app/[lang]/relics/[id]/edit/page.dev.tsx`,
   `app/[lang]/relics/[id]/clone/page.dev.tsx`,
   `app/[lang]/relics/new/page.dev.tsx` — dev-only relic editor, see

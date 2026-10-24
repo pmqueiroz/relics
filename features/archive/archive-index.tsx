@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { cx } from "../../components/ui/cx";
@@ -24,8 +25,7 @@ import { Header, type View } from "./header";
 import { HoverPreview, type PreviewPosition } from "./hover-preview";
 import { ListView } from "./list-view";
 import { domainCounts, queryCatalog, type SortDirection } from "./query";
-import { TextureEditor } from "./texture-editor/texture-editor";
-import { blankTexture } from "./texture-editor/texture-file";
+import { blankTexture } from "./texture-editor/texture-draft";
 import { useIndexParams } from "./use-index-params";
 import { useRelicHistory } from "./use-relic-history";
 
@@ -37,6 +37,12 @@ type ArchiveIndexProps = {
   orbitRpm?: number;
   dwell?: number;
 };
+
+const TextureEditor = dynamic(() =>
+  import("./texture-editor/texture-editor").then(
+    (module) => module.TextureEditor,
+  ),
+);
 
 const PREVIEW_WIDTH = 290;
 const PREVIEW_HEIGHT = 310;

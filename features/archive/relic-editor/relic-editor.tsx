@@ -28,11 +28,9 @@ import { relicPagePath } from "../artifact-config";
 import { KINDS, kindGeometry } from "../catalog";
 import { SPEC_FIELDS } from "../relic/manifest";
 import { isRecord } from "../relic/relic-file";
+import type { TextureDraft } from "../texture-editor/texture-draft";
 import { TextureEditor } from "../texture-editor/texture-editor";
-import {
-  encodeTexture,
-  type TextureDraft,
-} from "../texture-editor/texture-file";
+import { encodeTexture } from "../texture-editor/texture-file";
 import { CONDITIONS, ENTRY_TEXT_FIELDS, kindSpecs } from "./entry-draft";
 import { saveRelic } from "./save-relic";
 

@@ -1,10 +1,5 @@
 import { DEFAULT_FIT } from "../../../components/artifact/geometry";
-import type {
-  ArtifactKind,
-  FaceSide,
-} from "../../../components/artifact/types";
-import { type ArtifactConfig, blankConfig } from "../artifact-config";
-import { kindGeometry } from "../catalog";
+import type { FaceSide } from "../../../components/artifact/types";
 import { parseKind, parseModel } from "../relic/manifest";
 import {
   decodeRelic,
@@ -17,18 +12,10 @@ import {
 } from "../relic/relic-file";
 import { templateDimensions } from "./download-template";
 import { cropToFace } from "./ingest-image";
-
-export type TextureDraft = ArtifactConfig & {
-  kind: ArtifactKind;
-  meta: Record<string, unknown>;
-};
+import type { TextureDraft } from "./texture-draft";
 
 const FACES: FaceSide[] = ["obv", "rev"];
 const FIT_KEY = { obv: "fo", rev: "fr" } as const;
-
-export function blankTexture(kind: ArtifactKind): TextureDraft {
-  return { kind, meta: {}, ...blankConfig(kindGeometry(kind)) };
-}
 
 export function catalogId(draft: TextureDraft) {
   return typeof draft.meta.id === "string" ? draft.meta.id : null;

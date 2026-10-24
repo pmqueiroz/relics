@@ -5,7 +5,7 @@ import { isRecord } from "../relic/relic-file";
 import {
   blankTexture,
   type TextureDraft,
-} from "../texture-editor/texture-file";
+} from "../texture-editor/texture-draft";
 
 export const CONDITIONS = Object.keys(CONDITION_RANK) as Condition[];
 

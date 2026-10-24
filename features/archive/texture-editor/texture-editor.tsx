@@ -33,12 +33,11 @@ import {
   GEOMETRY_FIELDS,
   OPTION_FIELDS,
 } from "./schema";
+import { blankTexture, type TextureDraft } from "./texture-draft";
 import {
-  blankTexture,
   catalogId,
   downloadTexture,
   openTexture,
-  type TextureDraft,
   textureFileName,
 } from "./texture-file";
 
